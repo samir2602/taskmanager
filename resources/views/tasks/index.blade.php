@@ -28,7 +28,7 @@
             <div class="col-md-3">
                 <div class="card text-center shadow-sm border-0">
                     <div class="card-body">
-                        <h3 class="fw-bold text-primary">{{ auth()->user()->tasks->count() }}</h3>
+                        <h3 class="fw-bold text-primary">{{ $totalTasks }}</h3>
                         <small class="text-muted">Total Tasks</small>
                     </div>
                 </div>
@@ -36,7 +36,7 @@
             <div class="col-md-3">
                 <div class="card text-center shadow-sm border-0">
                     <div class="card-body">
-                        <h3 class="fw-bold text-warning">{{ auth()->user()->tasks->where('status', 'pending')->count() }}</h3>
+                        <h3 class="fw-bold text-warning">{{ $pendingTasks }}</h3>
                         <small class="text-muted">Pending</small>
                     </div>
                 </div>
@@ -44,7 +44,7 @@
             <div class="col-md-3">
                 <div class="card text-center shadow-sm border-0">
                     <div class="card-body">
-                        <h3 class="fw-bold text-info">{{ auth()->user()->tasks->where('status', 'in_progress')->count() }}</h3>
+                        <h3 class="fw-bold text-info">{{ $inProgressTasks }}</h3>
                         <small class="text-muted">In Progress</small>
                     </div>
                 </div>
@@ -52,12 +52,37 @@
             <div class="col-md-3">
                 <div class="card text-center shadow-sm border-0">
                     <div class="card-body">
-                        <h3 class="fw-bold text-success">{{ auth()->user()->tasks->where('status', 'completed')->count() }}</h3>
+                        <h3 class="fw-bold text-success">{{ $completedTasks }}</h3>
                         <small class="text-muted">Completed</small>
                     </div>
                 </div>
             </div>
         </div>
+
+        {{-- Progress Bar --}}
+        @if($totalTasks > 0)
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="fw-semibold">Overall Progress</span>
+                        <span class="text-muted">{{ $completedTasks }}/{{ $totalTasks }} tasks completed</span>
+                    </div>
+                    <div class="progress" style="height: 12px;">
+                        <div
+                            class="progress-bar {{ $percentage == 100 ? 'bg-success' : 'bg-primary' }}"
+                            style="width: {{ $percentage }}%"
+                        >
+                            {{ $percentage }}%
+                        </div>
+                    </div>
+                    @if($percentage == 100)
+                        <p class="text-success text-center mt-2 mb-0 fw-semibold">
+                            🎉 All tasks completed! Great job!
+                        </p>
+                    @endif
+                </div>
+            </div>
+        @endif
 
         {{-- Filters --}}
         <div class="card shadow-sm mb-4">
@@ -109,14 +134,22 @@
                                 <span class="badge {{ $task->status == 'completed' ? 'bg-success' : ($task->status == 'in_progress' ? 'bg-info' : 'bg-secondary') }}">
                                     {{ ucfirst(str_replace('_', ' ', $task->status)) }}
                                 </span>
-                                @if($task->due_date)
-                                    <span class="badge {{ $task->due_date->isPast() && $task->status != 'completed' ? 'bg-danger' : 'bg-light text-dark' }}">
-                                        📅 {{ $task->due_date->format('d M Y') }}
+                                @if($task->due_date)                                    
+                                    <span class="badge {{ $task->due_date->isPast() && $task->status != 'completed' ? 'bg-danger' : ($task->due_date->isToday() ? 'bg-warning text-dark' : 'bg-light text-dark') }}">
+                                        {{ $task->due_date->isPast() && $task->status != 'completed' ? '⚠️ Overdue' : '📅' }} 
+                                        {{ $task->due_date->format('d M Y') }}
                                     </span>
                                 @endif
                             </div>
 
                             <div class="d-flex gap-2">
+                                <form method="post" action="/tasks/{{ $task->id }}/complate">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="btn btn-sm {{ $task->status === 'completed' ? 'btn-success' : 'btn-outline-success' }}">
+                                    {{ $task->status === 'completed' ? '✅ Done' : '○ Complete'}}
+                                </button>
+                                </form>
                                 <a href="/tasks/{{ $task->id }}/edit" class="btn btn-sm btn-outline-secondary">Edit</a>
                                 <form method="POST" action="/tasks/{{ $task->id }}">
                                     @csrf

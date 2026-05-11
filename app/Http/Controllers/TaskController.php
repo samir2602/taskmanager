@@ -7,10 +7,47 @@ use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
+    public function dashboard()
+    {
+        $allTasks = Task::where('user_id', auth()->id())->get();
+        $totalTasks = $allTasks->count();
+        $completedTasks = $allTasks->where('status', 'completed')->count();
+        $pendingTasks = $allTasks->where('status', 'pending')->count();
+        $inProgressTasks = $allTasks->where('status', 'in_progress')->count();
+        $percentage = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
+        $overdueTasks = $allTasks->filter(function($task){
+            return $task->due_date && $task->due_date->isPast() && $task->status != 'completed';
+        })->count();
+
+        $urgentTasks = Task::where('user_id', auth()->id())
+        ->where('status', '!=', 'completed')
+        ->where('priority', 'high')
+        ->where('due_date', 'asc')        
+        ->take(5)
+        ->get();
+
+        return view('tasks.dashboard', [
+            'totalTasks' => $totalTasks,
+            'completedTasks' => $completedTasks,
+            'pendingTasks' => $pendingTasks,
+            'inProgressTasks' => $inProgressTasks,
+            'percentage' => $percentage,
+            'overdueTasks' => $overdueTasks,
+            'urgentTasks' => $urgentTasks,
+        ]);
+    }
+
     public function index(Request $request)
     {
         $status = $request->status;
         $priority = $request->priority;
+
+        $allTasks = Task::where('user_id', auth()->id())->get();
+        $totalTasks = $allTasks->count();
+        $completedTasks = $allTasks->where('status', 'completed')->count();
+        $pendingTasks = $allTasks->where('status', 'pending')->count();
+        $inProgressTasks = $allTasks->where('status', 'in_progress')->count();
+        $percentage = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
 
         $tasks = Task::where('user_id', auth()->id())
             ->when($status, function($query) use ($status) {
@@ -21,11 +58,16 @@ class TaskController extends Controller
             })
             ->orderBy('due_date', 'asc')
             ->get();
-
+        
         return view('tasks.index', [
             'tasks' => $tasks,
             'status' => $status,
-            'priority' => $priority
+            'priority' => $priority,
+            'totalTasks' => $totalTasks,
+            'completedTasks' => $completedTasks,
+            'pendingTasks' => $pendingTasks,
+            'inProgressTasks' => $inProgressTasks,
+            'percentage' => $percentage,
         ]);
     }
 
@@ -90,5 +132,18 @@ class TaskController extends Controller
         $this->authorize('delete', $task);
         $task->delete();
         return redirect('/tasks')->with('success', 'Task deleted successfully!');
+    }
+
+    public function complate(Task $task){
+        $this->authorize('complete', $task);
+
+        $newStatus = $task->status === 'completed' ? 'pending' : 'completed';
+
+
+        $task->update([
+            'status' => $newStatus
+        ]);
+
+        return redirect('/tasks')->with('success', $task->status === 'completed' ? 'Task marked as pending!' : 'Task completed! 🎉');
     }
 }

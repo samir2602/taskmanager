@@ -20,6 +20,7 @@
         <a class="navbar-brand fw-bold" href="/">✅ TaskManager</a>
         <div class="navbar-nav ms-auto d-flex flex-row gap-3 align-items-center">
             @auth
+                <a class="nav-link text-white" href="/dashboard">Dashboard</a>
                 <a class="nav-link text-white" href="/tasks">My Tasks</a>
                 <a class="btn btn-primary btn-sm" href="/tasks/create">+ New Task</a>
                 <form method="POST" action="/logout" class="m-0">

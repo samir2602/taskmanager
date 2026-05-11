@@ -63,4 +63,9 @@ class TaskPolicy
     {
         return false;
     }
+
+    public function complete(User $user, Task $task): bool
+    {
+        return $user->id === $task->user_id;
+    }
 }
