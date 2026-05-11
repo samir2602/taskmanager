@@ -29,7 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/tasks/{task}', [TaskController::class, 'destroy']);
 
     Route::patch('/tasks/{task}/complate', [TaskController::class, 'complate']);
-    Route::get('/dashboard', [TaskController::class, 'dashboard']);
+    Route::get('/dashboard', [TaskController::class, 'dashboard'])->name('dashboard');
 });
 
 require __DIR__.'/auth.php';
