@@ -22,7 +22,7 @@ class TaskController extends Controller
         $urgentTasks = Task::where('user_id', auth()->id())
         ->where('status', '!=', 'completed')
         ->where('priority', 'high')
-        ->where('due_date', 'asc')        
+        ->orderBy('due_date', 'asc')        
         ->take(5)
         ->get();
 
