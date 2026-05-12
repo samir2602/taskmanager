@@ -41,6 +41,7 @@ class TaskController extends Controller
     {
         $status = $request->status;
         $priority = $request->priority;
+        $search = $request->search;
 
         $allTasks = Task::where('user_id', auth()->id())->get();
         $totalTasks = $allTasks->count();
@@ -56,12 +57,16 @@ class TaskController extends Controller
             ->when($priority, function($query) use ($priority) {
                 $query->where('priority', $priority);
             })
+            ->when($search, function($query) use ($search) {
+                $query->where('title', 'like', '%'.$search.'%' );
+            })
             ->orderBy('due_date', 'asc')
             ->get();
         
         return view('tasks.index', [
             'tasks' => $tasks,
             'status' => $status,
+            'search' => $search,
             'priority' => $priority,
             'totalTasks' => $totalTasks,
             'completedTasks' => $completedTasks,

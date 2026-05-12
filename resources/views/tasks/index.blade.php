@@ -89,6 +89,9 @@
             <div class="card-body">
                 <form method="GET" action="/tasks" class="row g-3">
                     <div class="col-md-4">
+                        <input type="text" name="search" class="form-control" placeholder="Search tasks..." value="{{ $search }}"/>
+                    </div>
+                    <div class="col-md-4">
                         <select name="status" class="form-select">
                             <option value="">All Status</option>
                             <option value="pending" {{ $status == 'pending' ? 'selected' : '' }}>Pending</option>
