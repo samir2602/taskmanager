@@ -154,7 +154,7 @@
                                 </button>
                                 </form>
                                 <a href="/tasks/{{ $task->id }}/edit" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                <form method="POST" action="/tasks/{{ $task->id }}">
+                                <form method="POST" action="/tasks/{{ $task->id }}" onsubmit="return confirc('Are you sure you want to delete this task?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>

@@ -133,4 +133,15 @@
         </div>
     @endif
 
+    @if($totalTasks === 0)
+        <div class="card shadow-sm border-0 text-center">
+            <div class="card-body p-5">
+                <div style="font-size: 4rem;">📋</div>
+                <h4 class="fw-bold mt-3">No tasks yet!</h4>
+                <p class="text-muted">Create your first task to get started</p>
+                <a href="/tasks/create" class="btn btn-primary">+ Create First Task</a>
+            </div>
+        </div>
+    @endif
+
 @endsection
